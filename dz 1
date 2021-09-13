@@ -1,0 +1,39 @@
+use orders;
+
+#№2
+select month(o_date), year(o_date) from orders o group by year(o_date), month(o_date) ; #анализ по периоду данных
+
+#№3
+select count(distinct user_id) as кол_уник_польз, count(distinct id_o) as кол_заказов, count(*) as кол_строк from orders o ; #количество уникальных пользователей, заказов, строк
+
+#№4
+select avg(price), (count(id_o)/count(distinct user_id)), month(o_date), year(o_date) from orders o group by year(o_date), month(o_date);
+#средний чек односительно одного и того же месяца в 2016 и 2017 годах уменьшился, среднее количество заказов на пользователя тоже
+
+#№5
+select count( distinct user_id) from orders o where user_id 
+in (select distinct user_id from orders o2 where year(o_date) = 2016)
+and user_id not in (select distinct user_id from orders o2 where year(o_date) = 2017);
+
+#аномалии:
+
+select user_id, sum(price) from orders o group by user_id order by sum(price) desc limit 1;
+#пользователь, который потратил больше всего денег, скорее всего это анамалия, потому что там около 700000 рублей
+select user_id, sum(price) from orders o group by user_id order by sum(price) limit 1;
+#пользователь, который потратил меньше всего денег, очевидная ошибка, потому что там отрицательное число
+
+#№6
+
+select user_id, count(id_o) from orders o group by user_id order by count(id_o ) desc limit 1; #самый активный пользователь
+
+#№7
+
+select count(id_o)/12 from orders o where year(o_date) = 2016 group by year(o_date) #среднее количество заказов в меся в 2016
+
+select count(id_o)/12 from orders o where year(o_date) = 2017 group by year(o_date) #среднее количество заказов в меся в 2017
+
+select count(id_o)/(select count(id_o)/12 from orders o where year(o_date) = 2016 group by year(o_date)), year(o_date), month(o_date)
+from orders o where year(o_date) = 2016 group by year(o_date), month(o_date);#коэффициенты сезонности в 2016
+
+select count(id_o)/(select count(id_o)/12 from orders o where year(o_date) = 2017 group by year(o_date)), year(o_date), month(o_date)
+from orders o where year(o_date) = 2017 group by year(o_date), month(o_date);#коэффициенты сезонности в 2017
