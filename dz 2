@@ -1,0 +1,147 @@
+select count(distinct user_id)
+from orders o3 
+where user_id 
+in (select user_id 
+from orders o
+where o_date < '2017-02-01' and 
+user_id not in(select user_id from orders where o_date >= '2017-02-01' and o_date < '2017-04-01')
+group by user_id 
+having count(id_o)>=3)
+and month(o_date) = 4 and year(o_date)=2017 #сколько частопокупающих человек переставших покупать купили в апреле
+union 
+select count(distinct user_id)
+from (select user_id 
+from orders o
+where o_date < '2017-02-01' and 
+user_id not in(select user_id from orders where o_date >= '2017-02-01' and o_date < '2017-04-01')
+group by user_id 
+having count(id_o)>=3) t #сколько частопокупающих людей переставших покупать в марте и в феврале
+
+
+select count(distinct user_id)
+from orders o3 
+where user_id 
+in (select user_id
+from orders o 
+where o_date < '2017-04-01'
+group by user_id 
+having count(id_o) < 3)
+and month(o_date) = 4 and year(o_date)=2017
+union 
+select count(distinct user_id) from 
+(select user_id
+from orders o 
+where o_date < '2017-04-01'
+group by user_id 
+having count(id_o) < 3) t #сколько человек сделало покупку в апреле 2017 из тех, кто делал одну-две до этого и сколько бsло тех,кто сделал одну-две до апреля
+
+
+select count(distinct user_id)
+from orders o2 
+where user_id  in 
+(select user_id from orders where o_date < '2017-04-01' group by user_id having count(id_o) >= 3)
+and user_id in (select user_id from orders o3 where o_date >= '2017-02-01' and o_date < '2017-04-01')
+and month(o_date) = 4 and year(o_date) = 2017
+union 
+select count(distinct user_id)
+from orders o2 
+where user_id  in 
+(select user_id from orders where o_date < '2017-04-01' group by user_id having count(id_o) >= 3)
+and user_id in (select user_id from orders o3 where o_date >= '2017-02-01' and o_date < '2017-04-01')
+and o_date < '2017-04-01' #сколько частопокупающих сделало покупку в апреле и сколько всего частопокупающих(последняя покупка в марте или в феврале)
+
+
+select count(distinct user_id) as new_users, sum(price)
+from orders o
+where user_id 
+in (select user_id from  orders o2 group by user_id  having min(o_date) >= '2017-01-01' )
+and user_id not in (select user_id from  orders o2 group by user_id having min(o_date) >= '2017-02-01' )
+and year(o_date) = 2017 and month(o_date) = 1
+union
+select count(distinct user_id) as new_users, sum(price)
+from orders o
+where user_id 
+in (select user_id from  orders o2 group by user_id  having min(o_date) >= '2017-02-01' )
+and user_id not in (select user_id from  orders o2 group by user_id having min(o_date) >= '2017-03-01' )
+and year(o_date) = 2017 and month(o_date) = 2
+union
+select count(distinct user_id) as new_users, sum(price)
+from orders o
+where user_id 
+in (select user_id from  orders o2 group by user_id  having min(o_date) >= '2017-03-01' )
+and user_id not in (select user_id from  orders o2 group by user_id having min(o_date) >= '2017-04-01' )
+and year(o_date) = 2017 and month(o_date) = 3
+union
+select count(distinct user_id) as new_users, sum(price)
+from orders o
+where user_id
+in (select user_id from  orders o2 group by user_id  having min(o_date) >= '2017-04-01' )
+and user_id not in (select user_id from  orders o2 group by user_id having min(o_date) >= '2017-05-01' )
+and year(o_date) = 2017 and month(o_date) = 4 #сколько появилось новых покупателей в апреле, марте, феврале, мае и сколько денег они принесли 
+
+теперь считаем сколько людей в группах на конец апреля, умножаем их на полученные коэффициенты( какой процент из таких групп на конец марта купили в апреле) и умножаем на средний чек клиента
+
+
+select count(distinct user_id) from 
+(select user_id
+from orders o
+where o_date < '2017-05-01' and 
+user_id in (select user_id from orders where o_date >= '2017-03-01' and o_date < '2017-05-01')
+group by user_id 
+having count(id_o)>=3) t; #группа часто покупающих и последняя покупака в последнии два месяца
+
+select count(distinct user_id) from 
+(select user_id
+from orders o
+where o_date < '2017-05-01' and 
+user_id not in (select user_id from orders where o_date >= '2017-03-01' and o_date < '2017-05-01')
+group by user_id 
+having count(id_o)>=3) t;#группа переставших покупать частопокупающих покупателей
+
+select count(distinct user_id) from 
+(select user_id
+from orders o
+where o_date < '2017-05-01'
+group by user_id 
+having count(id_o)<3) t; #группа одна-две покупки
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
