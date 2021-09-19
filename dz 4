@@ -1,0 +1,31 @@
+select count(user_id), sum(summ)/(select sum(price) from orders o2),
+case 
+when RFM = 332 or RFM = 323 or RFM = 233 then 'VIP'
+when floor(RFM/100) = 1 then 'lost'
+else 'regular' end as status
+from (
+select user_id, summ,
+(case
+when r < 30 then 3
+when r < 60 and r >= 30 then 2
+else 1
+end)*100 +
+(case
+when f >= 5 then 3
+when f >= 2 and f<5 then 2
+else 1
+end)*10 +
+(case 
+when m > 20000 then 3
+when m > 10000 and m <= 20000 then 2
+else 1
+end) as RFM
+from
+(select user_id, sum(price) as summ,
+date('2017-12-31') - date(max(o_date)) as r,
+count(id_o) as f,
+sum(price) as m
+from orders o 
+group by user_id) t
+) tt
+group by status 
