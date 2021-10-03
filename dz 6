@@ -1,0 +1,26 @@
+Написать текст SQL-запроса, выводящего количество транзакций, сумму транзакций, среднюю сумму транзакции и дату и время первой транзакции для каждого клиента
+
+Select id_client,
+count(id_transation) as cnt,
+sum(transation_sum) as sm,
+(sum(transation_sum)/count(id_transation)) as avgsum,
+transatiom_date, --вернётся первая сточка, поэтому время и дата совпадёт
+transation_time
+from transation
+group by client
+order by transation_date
+
+Найти id пользователей, кот использовали более 70% карточного лимита
+
+Select t.id_client, f_sum/limit_sum
+from
+(
+Select id_client, limit_sum
+from id_clients
+)t join
+(Select id_client, sum(transaction_sum) as f_sum
+from transation
+group by client
+) tt
+on t.id_client = tt.id_client
+where (f_sum/limit_sum) > 0.7
